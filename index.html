@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>★ SPEED TEST 2000 ★</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: "Courier New", Courier, monospace;
+    background: #008080;
+    background-image: repeating-linear-gradient(45deg, #007070 0 2px, #008080 2px 4px);
+    color: #000;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px; font-size: 14px;
+  }
+  .window {
+    background: #c0c0c0; border: 3px outset #ffffff;
+    box-shadow: 4px 4px 0 #000; max-width: 620px; width: 100%;
+  }
+  .titlebar {
+    background: linear-gradient(90deg, #000080, #1084d0);
+    color: #fff; padding: 4px 8px; font-weight: bold; font-size: 13px;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 2px solid #000;
+  }
+  .titlebar .btns { display: flex; gap: 2px; }
+  .titlebar .btns span {
+    background: #c0c0c0; color: #000; border: 2px outset #fff;
+    width: 18px; height: 16px; font-size: 10px; line-height: 12px;
+    text-align: center; cursor: pointer;
+  }
+  .marquee-wrap {
+    background: #000; color: #00ff00;
+    border: 2px inset #808080; padding: 4px; margin: 8px;
+    overflow: hidden; white-space: nowrap; font-size: 12px;
+  }
+  .marquee-wrap span {
+    display: inline-block; padding-left: 100%;
+    animation: scroll 18s linear infinite;
+    text-shadow: 0 0 4px #00ff00;
+  }
+  @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+  .panel { border: 2px inset #fff; background: #d4d0c8; margin: 8px; padding: 12px; }
+  .row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 4px; border-bottom: 1px dotted #808080; font-size: 13px;
+  }
+  .row:last-child { border-bottom: none; }
+  .row .k { font-weight: bold; }
+  .row .v { color: #000080; font-weight: bold; }
+  .lcd {
+    background: #000; border: 3px inset #808080;
+    padding: 18px 10px; margin: 10px 0; text-align: center;
+    font-family: "Courier New", monospace;
+  }
+  .lcd .num {
+    font-size: 56px; font-weight: bold; color: #00ff00;
+    text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
+    letter-spacing: 4px; line-height: 1;
+  }
+  .lcd .unit { color: #00ff00; font-size: 12px; margin-top: 6px; letter-spacing: 3px; opacity: 0.85; }
+  .lcd .extra { color: #00aa00; font-size: 11px; margin-top: 4px; letter-spacing: 2px; }
+  .progress-outer {
+    background: #000; border: 3px inset #808080;
+    height: 22px; margin: 10px 0; padding: 2px; overflow: hidden;
+  }
+  .progress-inner {
+    height: 100%; width: 0%;
+    background: repeating-linear-gradient(90deg, #00ff00 0 8px, #00aa00 8px 16px);
+    transition: width 0.2s linear;
+  }
+  .big-btn {
+    display: block; width: calc(100% - 16px); margin: 8px;
+    padding: 14px; font-family: "Courier New", monospace;
+    font-size: 18px; font-weight: bold; letter-spacing: 3px;
+    color: #000; background: #c0c0c0;
+    border: 4px outset #ffffff; cursor: pointer; text-transform: uppercase;
+  }
+  .big-btn:hover:not(:disabled) { background: #d0d0d0; }
+  .big-btn:active:not(:disabled) { border-style: inset; }
+  .big-btn:disabled { color: #808080; cursor: wait; }
+  .status {
+    background: #000080; color: #ffff00; font-size: 12px;
+    padding: 6px 10px; margin: 8px; border: 2px inset #fff;
+    min-height: 26px; font-weight: bold;
+  }
+  .footer {
+    text-align: center; font-size: 10px; color: #404040;
+    padding: 6px; border-top: 1px solid #808080; margin-top: 8px;
+  }
+  .footer a { color: #000080; }
+  .blink { animation: blink 1s steps(2, start) infinite; }
+  @keyframes blink { to { visibility: hidden; } }
+  @media (max-width: 480px) {
+    .lcd .num { font-size: 40px; }
+    .big-btn { font-size: 15px; letter-spacing: 2px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="window">
+
+  <div class="titlebar">
+    <span>■ SPEED TEST 2000 — Internet Connection Analyzer</span>
+    <div class="btns"><span>_</span><span>□</span><span>×</span></div>
+  </div>
+
+  <div class="marquee-wrap">
+    <span>*** SPEED TEST 2000 *** ЗАМЕР СКОРОСТИ С НАШИХ СЕРВЕРОВ *** СЕРВЕР ВЫБИРАЕТСЯ ПО ВАШЕМУ IP ***</span>
+  </div>
+
+  <div class="panel">
+    <div class="row"><span class="k">Ваш IP:</span>   <span class="v" id="ip">—</span></div>
+    <div class="row"><span class="k">Страна:</span>   <span class="v" id="country">—</span></div>
+    <div class="row"><span class="k">Сервер:</span>   <span class="v" id="server">—</span></div>
+    <div class="row"><span class="k">Пинг:</span>     <span class="v" id="ping">— мс</span></div>
+    <div class="row"><span class="k">Файл:</span>     <span class="v" id="file">—</span></div>
+    <div class="row"><span class="k">Размер:</span>   <span class="v" id="size">—</span></div>
+  </div>
+
+  <div class="panel">
+    <div class="lcd">
+      <div class="num" id="speed">0.00</div>
+      <div class="unit">МБИТ/СЕК &nbsp;•&nbsp; DOWNLOAD</div>
+      <div class="extra" id="extra">&nbsp;</div>
+    </div>
+    <div class="progress-outer"><div class="progress-inner" id="bar"></div></div>
+  </div>
+
+  <button class="big-btn" id="go">► НАЧАТЬ ТЕСТ ◄</button>
+
+  <div class="status" id="status">Готов к работе. Нажмите кнопку для старта…</div>
+
+  <div class="footer">
+    © 1998—2026 SPEED TEST 2000 &nbsp;|&nbsp; Best viewed in Netscape Navigator 4.0 &nbsp;|&nbsp;
+    <a href="#">Гостевая книга</a> &nbsp;|&nbsp; <span class="blink">NEW!</span>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+//  ВАШИ СЕРВЕРЫ
+//  Путь /gggbbbiiillllopenspeedy отдаёт страницу подписки 3x-ui
+//  (~30-50 КБ). Замер по ней возможен, но неточный.
+//  Для точного замера — положите туда свой 153 КБ файл через
+//  Sub Theme Directory в настройках панели.
+// ============================================================
+const SERVERS = {
+  RU: { name: "РОССИЯ",    base: "https://ru-server.alwey.ru:2096/flowfreeRU" },
+  DE: { name: "ГЕРМАНИЯ",  base: "https://de2-server.flowfree.ru:2096/inetspeed" },
+  FI: { name: "ФИНЛЯНДИЯ", base: "https://fn-server.flowfree.ru:2096/inetspeed" },
+  SE: { name: "ШВЕЦИЯ",    base: "https://sw-flowfree.flowfree.ru:2096/inetspeed" }
+};
+
+const SPEED_PATHS = [
+  "/gggbbbiiillllopenspeedy",
+  "/gggbbbiiillllopenspeedy?view=raw",
+  "/sub/gggbbbiiillllopenspeedy",
+  "/",
+  "/10mb.bin"
+];
+
+const COUNTRY_MAP = {
+  RU:"RU", BY:"RU", KZ:"RU", UA:"RU", AM:"RU", KG:"RU", UZ:"RU", MD:"RU",
+  DE:"DE", AT:"DE", CH:"DE", NL:"DE", BE:"DE", PL:"DE", CZ:"DE", FR:"DE", GB:"DE", IT:"DE", ES:"DE",
+  FI:"FI", EE:"FI", LV:"FI", LT:"FI",
+  SE:"SE", NO:"SE", DK:"SE", IS:"SE"
+};
+const DEFAULT_SERVER = "DE";
+const MIN_GOOD_SIZE  = 1024 * 1024;
+const ATTEMPTS       = 3;
+
+const el = {
+  ip:      document.getElementById("ip"),
+  country: document.getElementById("country"),
+  server:  document.getElementById("server"),
+  ping:    document.getElementById("ping"),
+  file:    document.getElementById("file"),
+  size:    document.getElementById("size"),
+  speed:   document.getElementById("speed"),
+  extra:   document.getElementById("extra"),
+  bar:     document.getElementById("bar"),
+  go:      document.getElementById("go"),
+  status:  document.getElementById("status")
+};
+
+const setStatus = t => el.status.textContent = t;
+const setSpeed  = v => el.speed.textContent = Number(v).toFixed(2);
+const setExtra  = t => el.extra.textContent = t;
+const setBar    = p => el.bar.style.width = Math.max(0, Math.min(100, p)) + "%";
+
+// ============================================================
+//  Гео
+// ============================================================
+async function detectGeo() {
+  const sources = [
+    { url: "https://ipapi.co/json/", pick: d => ({ ip: d.ip, cc: d.country_code }) },
+    { url: "https://ipwho.is/",      pick: d => ({ ip: d.ip, cc: d.country_code }) }
+  ];
+  for (const s of sources) {
+    try {
+      const r = await fetch(s.url, { cache: "no-store" });
+      if (!r.ok) continue;
+      const d = await r.json();
+      const info = s.pick(d);
+      if (info && info.cc) return info;
+    } catch(e) {}
+  }
+  return null;
+}
+
+// ============================================================
+//  Пинг через no-cors (работает даже при 404)
+// ============================================================
+async function pingOnce(url) {
+  const t0 = performance.now();
+  try {
+    await fetch(url + "?_=" + Math.random(), {
+      mode: "no-cors", cache: "no-store", redirect: "follow"
+    });
+  } catch(e) {}
+  return performance.now() - t0;
+}
+
+async function measurePing(url, n = 4) {
+  const arr = [];
+  for (let i = 0; i < n; i++) {
+    arr.push(await pingOnce(url));
+    el.ping.textContent = Math.round(Math.min(...arr)) + " мс";
+    await new Promise(r => setTimeout(r, 120));
+  }
+  return Math.min(...arr);
+}
+
+// ============================================================
+//  Поиск рабочего URL.
+//  ГЛАВНОЕ: не проверяем HEAD, а пробуем скачать первые байты
+//  через Range-запрос. 200/206 = URL живой. 404 — пробуем след.
+//  Content-Length не обязателен — считаем по факту.
+// ============================================================
+async function findWorkingUrl(base) {
+  for (const p of SPEED_PATHS) {
+    const url = base + p;
+    try {
+      const r = await fetch(url + (p.includes("?") ? "&" : "?") + "_=" + Math.random(), {
+        cache: "no-store",
+        headers: { "Range": "bytes=0-2047" }
+      });
+      if (!r.ok && r.status !== 206) continue;
+      // если HTML-страница подписки 3x-ui — тоже подходит,
+      // просто она маленькая
+      return { url };
+    } catch(e) {}
+  }
+  return null;
+}
+
+// ============================================================
+//  Один замер: качаем и считаем Мбит/с в реальном времени.
+//  Content-Length необязателен — прогресс считаем по времени.
+// ============================================================
+async function measureOnce(fileUrl) {
+  const url = fileUrl + (fileUrl.includes("?") ? "&" : "?") + "r=" + Math.random();
+  const t0 = performance.now();
+
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok && res.status !== 206) throw new Error("HTTP " + res.status);
+
+  const total = parseInt(res.headers.get("content-length") || "0", 10);
+  const reader = res.body.getReader();
+  let received = 0;
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    received += value.length;
+    const elapsed = (performance.now() - t0) / 1000;
+    if (elapsed > 0.1) {
+      const mbps = (received * 8) / elapsed / 1e6;
+      setSpeed(mbps);
+      if (total > 0) setBar((received / total) * 100);
+      else setBar(Math.min(100, (elapsed / 10) * 100));
+    }
+  }
+
+  const elapsed = (performance.now() - t0) / 1000;
+  return { mbps: (received * 8) / elapsed / 1e6, bytes: received, elapsed, total };
+}
+
+// ============================================================
+//  Главный сценарий — одна кнопка
+// ============================================================
+let busy = false;
+
+async function runAll() {
+  if (busy) return;
+  busy = true;
+  el.go.disabled = true;
+  el.go.textContent = "► РАБОТАЮ… ◄";
+  setSpeed(0); setBar(0); setExtra("");
+  el.ping.textContent = "— мс";
+  el.file.textContent = "—";
+  el.size.textContent = "—";
+  el.ip.textContent = "…"; el.country.textContent = "…"; el.server.textContent = "…";
+
+  // 1. Гео
+  setStatus("ОПРЕДЕЛЯЮ СТРАНУ…");
+  const geo = await detectGeo();
+
+  let key = DEFAULT_SERVER;
+  if (geo) {
+    el.ip.textContent = geo.ip || "—";
+    key = COUNTRY_MAP[geo.cc] || DEFAULT_SERVER;
+    el.country.textContent = geo.cc;
+  } else {
+    el.ip.textContent = "неизвестно";
+    el.country.textContent = "?";
+  }
+
+  const srv = SERVERS[key];
+  el.server.textContent = srv.name;
+
+  // 2. Пинг
+  setStatus("ПИНГУЮ СЕРВЕР " + srv.name + "…");
+  try {
+    const minPing = await measurePing(srv.base + "/", 4);
+    el.ping.textContent = Math.round(minPing) + " мс";
+  } catch(e) {
+    el.ping.textContent = "N/A";
+  }
+
+  // 3. Ищем рабочий URL
+  setStatus("ИЩУ ДОСТУПНЫЙ URL…");
+  let found = null;
+  try {
+    found = await findWorkingUrl(srv.base);
+  } catch(e) {}
+
+  if (!found) {
+    el.file.textContent = "НЕ НАЙДЕН";
+    setStatus("❌ НИ ОДИН ИЗ ПУТЕЙ НЕ ОТВЕЧАЕТ. СЕРВЕР НЕДОСТУПЕН ИЛИ БЛОКИРУЕТ CORS.");
+    el.go.disabled = false;
+    el.go.textContent = "► ПОВТОРИТЬ ТЕСТ ◄";
+    busy = false;
+    return;
+  }
+
+  el.file.textContent = found.url.replace(srv.base, "") || "/";
+
+  // 4. Три попытки, берём лучшую
+  setStatus("ЗАМЕРЯЮ СКОРОСТЬ С СЕРВЕРА " + srv.name + "…");
+  const results = [];
+  let lastErr = null;
+  let lastBytes = 0;
+  let lastTotal = 0;
+
+  for (let i = 1; i <= ATTEMPTS; i++) {
+    try {
+      setBar(0);
+      setStatus("ПОПЫТКА " + i + " ИЗ " + ATTEMPTS + " …");
+      const r = await measureOnce(found.url);
+      results.push(r.mbps);
+      lastBytes = r.bytes;
+      lastTotal = r.total;
+    } catch(e) {
+      lastErr = e;
+    }
+  }
+
+  if (results.length === 0) {
+    setStatus("ОШИБКА ЗАМЕРА: " + (lastErr ? lastErr.message : "нет данных"));
+    el.go.disabled = false;
+    el.go.textContent = "► ПОВТОРИТЬ ТЕСТ ◄";
+    busy = false;
+    return;
+  }
+
+  const max = Math.max(...results);
+  const avg = results.reduce((a,b)=>a+b,0) / results.length;
+
+  el.size.textContent = lastBytes.toLocaleString("ru-RU") + " байт";
+  setSpeed(max);
+  setBar(100);
+
+  if (lastBytes < MIN_GOOD_SIZE) {
+    setExtra("⚠ ФАЙЛ МАЛ (" + Math.round(lastBytes/1024) + " КБ) · МАКС " + max.toFixed(2) + " / СРЕД " + avg.toFixed(2));
+    setStatus("ГОТОВО (МАЛЫЙ ФАЙЛ). РЕАЛЬНАЯ СКОРОСТЬ ВЫШЕ: " + max.toFixed(2) + "+ МБИТ/С");
+  } else {
+    setExtra("МАКС " + max.toFixed(2) + " / СРЕД " + avg.toFixed(2) + " МБИТ/С");
+    setStatus("ГОТОВО. СКОРОСТЬ: " + max.toFixed(2) + " МБИТ/С");
+  }
+
+  el.go.disabled = false;
+  el.go.textContent = "► ПОВТОРИТЬ ТЕСТ ◄";
+  busy = false;
+}
+
+el.go.addEventListener("click", runAll);
+</script>
+
+</body>
+</html>
